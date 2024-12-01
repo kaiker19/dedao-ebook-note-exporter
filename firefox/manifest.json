@@ -1,0 +1,25 @@
+{
+  "manifest_version": 2,
+  "name": "得到读书笔记导出",
+  "version": "1.0",
+  "description": "导出得到读书PC版笔记为Markdown格式",
+  "permissions": [
+    "activeTab",
+    "downloads",
+    "*://*.dedao.cn/*",
+    "tabs"
+  ],
+  "browser_action": {
+    "default_title": "导出笔记",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.dedao.cn/ebook/reader*"],
+      "js": ["content.js"]
+    }
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  }
+}
