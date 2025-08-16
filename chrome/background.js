@@ -1,8 +1,6 @@
 chrome.runtime.onMessage.addListener((message, sender) => {
-  console.log("Background script received message:", message);
   
   if (message.action === "downloadMarkdown") {
-    console.log("Processing download request");
     try {
       // 在Manifest V3的Service Worker中，使用FileReader将Blob转换为Data URL
       const blob = new Blob([message.markdown], {type: 'text/plain;charset=utf-8'});
@@ -16,7 +14,7 @@ chrome.runtime.onMessage.addListener((message, sender) => {
           .replace(/\s+/g, ' '); // 多个空格合并为一个
         filename = `${cleanTitle}.txt`;
       }
-      console.log("Using filename:", filename);
+
       
       const reader = new FileReader();
       reader.onload = function() {
@@ -27,7 +25,6 @@ chrome.runtime.onMessage.addListener((message, sender) => {
           filename: filename,
           saveAs: true
         }).then((downloadId) => {
-          console.log("Download initiated with ID:", downloadId);
           // 文件保存对话框本身就是用户反馈，不需要额外的成功提示
           
         }).catch((error) => {
