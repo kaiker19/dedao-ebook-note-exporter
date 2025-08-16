@@ -3,6 +3,9 @@
   "name": "得到读书笔记导出",
   "version": "1.0",
   "description": "导出得到读书PC版笔记为Markdown格式",
+  "icons": {
+    "128": "dedao_output.png"
+  },
   "permissions": [
     "activeTab",
     "downloads",
@@ -13,7 +16,8 @@
   ],
   "action": {
     "default_title": "导出笔记",
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": "dedao_output.png"
   },
   "content_scripts": [
     {
