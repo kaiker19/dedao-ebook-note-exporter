@@ -44,11 +44,30 @@ function exportNotes() {
   }
 }
 
-// 构建完整目录映射
+// 动态构建多级目录映射
 function buildCatalogMap() {
   const catalogItems = document.querySelectorAll('.iget-reader-catalog-content li');
   const catalogMap = [];
+  const paddingLevels = new Set();
   
+  // 第一遍：收集所有padding值
+  catalogItems.forEach(item => {
+    const style = item.getAttribute('style') || '';
+    const paddingMatch = style.match(/padding-left:\s*(\d+)px/);
+    const padding = paddingMatch ? parseInt(paddingMatch[1]) : 56;
+    paddingLevels.add(padding);
+  });
+  
+  // 将padding值排序，建立动态层级映射
+  const sortedPaddings = Array.from(paddingLevels).sort((a, b) => a - b);
+  const paddingToLevel = {};
+  sortedPaddings.forEach((padding, index) => {
+    paddingToLevel[padding] = index + 1; // 从1级开始
+  });
+  
+  console.log("动态检测到的层级结构:", paddingToLevel);
+  
+  // 第二遍：构建目录映射
   catalogItems.forEach(item => {
     const text = item.querySelector('.iget-reader-catalog-item-text')?.textContent.trim();
     const style = item.getAttribute('style') || '';
@@ -56,11 +75,7 @@ function buildCatalogMap() {
     const padding = paddingMatch ? parseInt(paddingMatch[1]) : 56;
     
     if (text) {
-      // 根据padding-left确定层级：56px=1级，76px=2级，96px=3级
-      let level = 2; // 默认二级
-      if (padding === 56) level = 1;
-      else if (padding === 76) level = 2;
-      else if (padding === 96) level = 3;
+      const level = paddingToLevel[padding] || 1;
       
       catalogMap.push({
         title: text,
@@ -136,27 +151,62 @@ function processNotes(catalogMap, bookTitle) {
   });
 }
 
-// 分批逐层展开目录：一级→二级→三级
+// 动态分批逐层展开目录：自动检测所有层级
 function expandAllLevels(callback) {
   try {
-    console.log("开始分批逐层展开目录...");
+    console.log("开始动态分批展开目录...");
     
-    // 第一批：展开一级标题（56px）
-    expandLevel(56, "一级", () => {
-      // 第二批：展开二级标题（76px）
-      expandLevel(76, "二级", () => {
-        // 第三批：展开三级标题（96px）
-        expandLevel(96, "三级", () => {
-          console.log("所有层级展开完成");
-          callback();
-        });
-      });
-    });
+    // 动态检测所有层级
+    const allPaddings = detectAllLevels();
+    console.log("检测到的所有层级:", allPaddings);
+    
+    // 递归展开每个层级
+    expandLevelsRecursively(allPaddings, 0, callback);
     
   } catch (error) {
     console.warn("展开目录失败:", error);
     callback();
   }
+}
+
+// 检测当前页面的所有层级
+function detectAllLevels() {
+  const items = document.querySelectorAll('.iget-reader-catalog-content li');
+  const paddingSet = new Set();
+  
+  items.forEach(li => {
+    const style = li.getAttribute('style') || '';
+    const paddingMatch = style.match(/padding-left:\s*(\d+)px/);
+    const padding = paddingMatch ? parseInt(paddingMatch[1]) : 56;
+    paddingSet.add(padding);
+  });
+  
+  // 按padding值排序，从小到大（层级从浅到深）
+  return Array.from(paddingSet).sort((a, b) => a - b);
+}
+
+// 递归展开各层级
+function expandLevelsRecursively(paddingLevels, currentIndex, callback) {
+  if (currentIndex >= paddingLevels.length) {
+    console.log("所有层级展开完成");
+    callback();
+    return;
+  }
+  
+  const currentPadding = paddingLevels[currentIndex];
+  const levelNumber = currentIndex + 1;
+  const levelName = getLevelName(levelNumber);
+  
+  expandLevel(currentPadding, levelName, () => {
+    // 展开下一层级
+    expandLevelsRecursively(paddingLevels, currentIndex + 1, callback);
+  });
+}
+
+// 获取层级名称
+function getLevelName(levelNumber) {
+  const levelNames = ["一级", "二级", "三级", "四级", "五级", "六级", "七级", "八级"];
+  return levelNames[levelNumber - 1] || `${levelNumber}级`;
 }
 
 // 展开指定层级的函数
