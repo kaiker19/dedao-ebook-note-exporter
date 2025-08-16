@@ -1,4 +1,5 @@
-console.log("Content script loaded");
+console.log("Content script loaded on:", window.location.href);
+console.log("Page title:", document.title);
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log("Content script received message:", message);
@@ -17,6 +18,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 function exportNotes() {
   console.log("Starting to export notes");
   try {
+    // 首先获取书籍标题用于文件命名
+    let bookTitle = "得到笔记";
+    const catalogElement = document.querySelector('.iget-reader-catalog-name');
+    if (catalogElement) {
+      const bookNameElement = catalogElement.querySelector('.iget-reader-catalog-book-name');
+      if (bookNameElement) {
+        bookTitle = bookNameElement.textContent.trim();
+        console.log("Found book title:", bookTitle);
+      }
+    }
+    
     const noteList = document.querySelector('.reader-note-list');
     console.log("Note list element:", noteList);
     
@@ -43,10 +55,11 @@ function exportNotes() {
     });
 
     console.log("Sending markdown to background script");
-    // 发送数据到background script处理下载
+    // 发送数据到background script处理下载，包含书籍标题
     chrome.runtime.sendMessage({
       action: "downloadMarkdown",
-      markdown: markdown
+      markdown: markdown,
+      bookTitle: bookTitle
     });
     
   } catch (error) {

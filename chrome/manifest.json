@@ -17,8 +17,10 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://*.dedao.cn/ebook/reader*"],
-      "js": ["content.js"]
+      "matches": ["*://*.dedao.cn/*"],
+      "js": ["content.js"],
+      "run_at": "document_end",
+      "all_frames": false
     }
   ],
   "background": {
