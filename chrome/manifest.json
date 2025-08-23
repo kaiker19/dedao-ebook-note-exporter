@@ -7,7 +7,6 @@
     "128": "dedao_output.png"
   },
   "permissions": [
-    "activeTab",
     "downloads",
     "tabs"
   ],
